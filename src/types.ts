@@ -28,7 +28,7 @@ export interface ScratchPadState {
 }
 
 export const STORAGE_KEY = "scratch-pad-state"
-export const CONTENT_CLASS = "sp-prose"
+export const CONTENT_CLASS = "sp-preview"
 
 export const WELCOME_MARKDOWN = `# Welcome to Scratch Pad
 

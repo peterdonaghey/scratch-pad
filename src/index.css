@@ -105,43 +105,61 @@ body {
   background: #fce8e6;
 }
 
-/* ===== Editor wrapper ===== */
-.editor-wrapper {
+/* ===== Split pane ===== */
+.split-pane {
   flex: 1;
+  display: flex;
+  min-height: 0;
   overflow: hidden;
+}
+
+.pane {
+  flex: 1;
   display: flex;
   flex-direction: column;
+  min-width: 0;
+}
+
+.pane-edit {
+  border-right: 1px solid #e0e0e0;
+}
+
+.pane-label {
+  padding: 6px 14px;
+  font-size: 11px;
+  font-weight: 600;
+  color: #999;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  border-bottom: 1px solid #eee;
+  flex-shrink: 0;
+  background: #fafafa;
+}
+
+.md-input {
+  flex: 1;
+  width: 100%;
+  border: none;
+  outline: none;
+  resize: none;
+  padding: 14px 18px;
+  font-family: 'SF Mono', 'Fira Code', Consolas, monospace;
+  font-size: 14px;
+  line-height: 1.7;
+  color: #333;
   background: #fff;
 }
 
-/* MDXEditor root takes full height */
-.editor-wrapper .mdxeditor {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
+.md-input::placeholder {
+  color: #bbb;
 }
 
-/* Toolbar */
-.editor-wrapper .mdxeditor-toolbar {
-  flex-shrink: 0;
-  border-bottom: 1px solid #e0e0e0;
-  padding: 4px 8px;
-  background: #fafafa;
-  gap: 2px;
-  flex-wrap: wrap;
-}
-
-/* Toolbar buttons */
-.editor-wrapper .mdxeditor-toolbar button {
-  border-radius: 4px;
-}
-
-/* Content area — scrolls internally */
-.editor-wrapper .mdxeditor-rich-text-editor,
-.editor-wrapper .mdxeditor-root-contenteditable {
+.preview {
   flex: 1;
   overflow-y: auto;
-  padding: 32px 48px;
+  padding: 14px 18px;
+  line-height: 1.7;
+  background: #fff;
 }
 
 /* ===== Styles Panel ===== */
