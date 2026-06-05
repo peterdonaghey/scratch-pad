@@ -29,8 +29,10 @@ export function saveToStorage(state: ScratchPadState, sheetName?: string): void 
 }
 
 export function parseNameFromUrl(): string | null {
-  const params = new URLSearchParams(window.location.search)
-  return params.get("name") || null
+  // Read name from path: /name-here → "name-here"
+  // Skip empty segments and the root path
+  const path = window.location.pathname.replace(/^\//, "").replace(/\/$/, "")
+  return path || null
 }
 
 export function parseMdFromUrl(): string | null {
@@ -45,9 +47,11 @@ export function parseMdFromUrl(): string | null {
 }
 
 export function buildScratchPadUrl(markdown: string, sheetName?: string): string {
-  const url = new URL(window.location.origin + window.location.pathname)
-  url.searchParams.set("md", encodeURIComponent(markdown))
-  if (sheetName) url.searchParams.set("name", sheetName)
+  const base = sheetName
+    ? `${window.location.origin}/${encodeURIComponent(sheetName)}`
+    : window.location.origin + window.location.pathname.replace(/[^/]*$/, "")
+  const url = new URL(base)
+  url.searchParams.set("md", markdown)
   return url.toString()
 }
 

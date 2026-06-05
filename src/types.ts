@@ -32,20 +32,21 @@ export const CONTENT_CLASS = "sp-preview"
 
 export const WELCOME_MARKDOWN = `# Welcome to Scratch Pad
 
-A clean WYSIWYG markdown editor. Start typing — your content auto-saves.
+A clean markdown editor with live preview. Start typing — your content auto-saves.
 
 ## Quick start
 
-- Use the **toolbar** above to format text (bold, italic, lists, headings)
-- Open the **Styles** panel on the right to customize the look
-- Select all + **Cmd+C** to copy styled content anywhere
+- Write markdown on the left, see the rendered preview on the right
+- Open the **Styles** panel to customize fonts and colors
+- Click **Copy rendered** to paste styled content into any app
 - Click **Export .md** to download the raw markdown
 
 ## Features
 
 - Auto-saves to localStorage (500ms debounce)
 - Full style control (fonts, sizes, colors)
-- URL param loading: \`/?md=<encoded-markdown>\`
+- Path-based sheets: \`/sheet-name\` creates a named scratch pad
+- URL param loading: \`/?md=<encoded-markdown>\` or \`/sheet?md=...\`
 - No backend needed — runs entirely in your browser
 `
 
