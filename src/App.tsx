@@ -69,38 +69,22 @@ export default function App() {
   // Generate the dynamic style tag content
   const styleCss = useMemo(() => proseConfigToCss(prose), [prose])
 
-  // Copy rendered HTML to clipboard
+  // Copy rendered — selects all in the preview div and uses native browser copy
+  // so computed styles (table borders, fonts, etc.) survive the paste
   const handleCopy = useCallback(() => {
     const preview = previewRef.current
     if (!preview) return
-    const html = preview.innerHTML
-    if (!html.trim()) return
-    const text = preview.textContent || ""
 
-    navigator.clipboard
-      .write([
-        new ClipboardItem({
-          "text/html": new Blob([html], { type: "text/html" }),
-          "text/plain": new Blob([text], { type: "text/plain" }),
-        }),
-      ])
-      .then(
-        () => {
-          setCopied(true)
-          setTimeout(() => setCopied(false), 1500)
-        },
-        () => {
-          const range = document.createRange()
-          range.selectNodeContents(preview)
-          const sel = window.getSelection()
-          sel?.removeAllRanges()
-          sel?.addRange(range)
-          document.execCommand("copy")
-          sel?.removeAllRanges()
-          setCopied(true)
-          setTimeout(() => setCopied(false), 1500)
-        },
-      )
+    const range = document.createRange()
+    range.selectNodeContents(preview)
+    const sel = window.getSelection()
+    sel?.removeAllRanges()
+    sel?.addRange(range)
+    document.execCommand("copy")
+    sel?.removeAllRanges()
+
+    setCopied(true)
+    setTimeout(() => setCopied(false), 1500)
   }, [])
 
   // Export markdown
