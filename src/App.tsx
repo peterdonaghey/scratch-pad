@@ -12,7 +12,6 @@ import {
 import { CONTENT_CLASS, WELCOME_MARKDOWN } from "./types"
 
 export default function App() {
-  // Combined state — single object avoids stale-closure problems
   const [state, setState] = useState<
     ScratchPadState & { loadedFromUrl: boolean; sheetName: string | null }
   >(() => {
@@ -31,17 +30,18 @@ export default function App() {
   const [copied, setCopied] = useState(false)
   const previewRef = useRef<HTMLDivElement>(null)
 
-  // Debounced auto-save
-  const saveTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  // Debounced auto-save — NEVER saves to a named key when loaded from URL
+  // (prevents ?md= from overwriting a user's named sheet)
   useEffect(() => {
-    if (saveTimer.current) clearTimeout(saveTimer.current)
-    saveTimer.current = setTimeout(() => {
-      saveToStorage({ markdown, prose }, sheetName ?? undefined)
+    // Skip auto-save when content arrived via URL on a named sheet
+    if (loadedFromUrl && sheetName) return
+
+    const key = sheetName ?? undefined
+    const timer = setTimeout(() => {
+      saveToStorage({ markdown, prose }, key)
     }, 500)
-    return () => {
-      if (saveTimer.current) clearTimeout(saveTimer.current)
-    }
-  }, [markdown, prose, sheetName])
+    return () => clearTimeout(timer)
+  }, [markdown, prose, sheetName, loadedFromUrl])
 
   // Handle editor text change
   const handleChange = useCallback((md: string) => {
@@ -73,10 +73,8 @@ export default function App() {
   const handleCopy = useCallback(() => {
     const preview = previewRef.current
     if (!preview) return
-
     const html = preview.innerHTML
     if (!html.trim()) return
-
     const text = preview.textContent || ""
 
     navigator.clipboard
@@ -92,7 +90,6 @@ export default function App() {
           setTimeout(() => setCopied(false), 1500)
         },
         () => {
-          // Fallback
           const range = document.createRange()
           range.selectNodeContents(preview)
           const sel = window.getSelection()
@@ -134,6 +131,25 @@ export default function App() {
     }
   }, [])
 
+  // Save as named sheet
+  const handleSave = useCallback(() => {
+    const name = prompt("Save as:", sheetName || "")
+    if (!name || !name.trim()) return
+
+    const clean = name.trim()
+    saveToStorage({ markdown, prose }, clean)
+
+    // Navigate to the named path (no ?md= since we just saved)
+    const path = `/${encodeURIComponent(clean)}`
+    window.history.pushState(null, "", path)
+
+    setState((prev) => ({
+      ...prev,
+      sheetName: clean,
+      loadedFromUrl: false,
+    }))
+  }, [markdown, prose, sheetName])
+
   return (
     <div className="app-shell">
       <style>{styleCss}</style>
@@ -143,11 +159,17 @@ export default function App() {
         <div className="topbar-left">
           <h1 className="app-title">Scratch Pad</h1>
           {sheetName && <span className="badge badge-sheet">{sheetName}</span>}
-          {loadedFromUrl && (
+          {loadedFromUrl && !sheetName && (
             <span className="badge badge-chat">Loaded from chat</span>
+          )}
+          {loadedFromUrl && sheetName && (
+            <span className="badge badge-chat">Viewing shared — edit to save</span>
           )}
         </div>
         <div className="topbar-right">
+          <button className="btn" onClick={handleSave}>
+            💾 Save
+          </button>
           <button className="btn" onClick={handleCopy}>
             {copied ? "✅ Copied" : "📋 Copy rendered"}
           </button>
