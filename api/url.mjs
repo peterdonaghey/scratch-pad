@@ -1,46 +1,62 @@
 /**
- * POST /api/url  —  body: { "md": "# markdown", "name": "optional-name" }
+ * POST /api/url  —  { "md": "# markdown", "name": "optional" }
  *   → 200 { "url": "https://..." }
  *
  * GET /api/url?md=<encoded>&name=<optional>
- *   → 302 redirect to https://...
+ *   → 200 { "url": "https://..." }
  *
- * Any agent with basic fetch can use this.
+ * Any agent anywhere can use this — just send markdown, get a URL back.
  */
 
 const BASE = "https://scratch-pad-beryl.vercel.app"
 
 function buildUrl(md, name) {
-  const url = new URL(BASE + (name ? `/${encodeURIComponent(name)}` : "/"))
-  url.searchParams.set("md", md)
-  return url.toString()
+  const u = new URL(BASE + (name ? `/${encodeURIComponent(name)}` : "/"))
+  u.searchParams.set("md", md)
+  return u.toString()
 }
 
-export default function handler(req, res) {
-  // CORS headers so any agent can call this
+function respond(res, md, name) {
+  if (!md || typeof md !== "string") {
+    res.writeHead(400, { "Content-Type": "application/json" })
+    return res.end(JSON.stringify({ error: 'Missing "md" parameter' }))
+  }
+  const url = buildUrl(md, name)
+  res.writeHead(200, { "Content-Type": "application/json" })
+  res.end(JSON.stringify({ url }))
+}
+
+function readBody(req) {
+  return new Promise((resolve) => {
+    let body = ""
+    req.on("data", (c) => (body += c))
+    req.on("end", () => resolve(body))
+  })
+}
+
+export default async function handler(req, res) {
   res.setHeader("Access-Control-Allow-Origin", "*")
   res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS")
   res.setHeader("Access-Control-Allow-Headers", "Content-Type")
 
-  if (req.method === "OPTIONS") {
-    return res.status(200).end()
-  }
+  if (req.method === "OPTIONS") return res.status(200).end()
 
   if (req.method === "POST") {
-    const { md, name } = req.body || {}
-    if (!md || typeof md !== "string") {
-      return res.status(400).json({ error: 'Missing "md" string in body' })
+    const raw = await readBody(req)
+    try {
+      const { md, name } = JSON.parse(raw)
+      return respond(res, md, name)
+    } catch {
+      res.writeHead(400, { "Content-Type": "application/json" })
+      return res.end(JSON.stringify({ error: "Invalid JSON body" }))
     }
-    return res.json({ url: buildUrl(md, name) })
   }
 
   if (req.method === "GET") {
-    const md = req.query?.md
-    if (!md) {
-      return res.status(400).json({ error: 'Missing "md" query parameter' })
-    }
-    return res.redirect(302, buildUrl(md, req.query?.name))
+    const qs = new URLSearchParams(req.url.split("?")[1] || "")
+    return respond(res, qs.get("md"), qs.get("name"))
   }
 
-  return res.status(405).json({ error: "Method not allowed" })
+  res.writeHead(405, { "Content-Type": "application/json" })
+  res.end(JSON.stringify({ error: "Method not allowed" }))
 }
