@@ -30,35 +30,46 @@ Scratch Pad is a split-pane markdown editor:
 | `/?md=<encoded>` | Load content from URL, auto-saves to unnamed key |
 | `/sheet-name` | Named sheet, loads/saves from local storage |
 | `/sheet-name?md=<encoded>` | View shared content on a named sheet — **never** overwrites saved content until user explicitly saves |
+| `GET /api/url?md=<encoded>&name=<optional>` | Returns `{ "url": "..." }` — no redirect, pure JSON |
+| `POST /api/url` `{ "md": "...", "name": "..." }` | Returns `{ "url": "..." }` — send raw markdown, no encoding needed |
 
-## When to POST vs inline URL
+## API endpoints
 
-**POST /api/url** — use when you have raw markdown and need a URL. The endpoint handles encoding, so you just send plain text:
+Both endpoints return the same JSON: `{ "url": "https://..." }`
 
-```js
-// Agent pseudocode
-fetch("https://scratch-pad-beryl.vercel.app/api/url", {
-  method: "POST",
-  headers: { "Content-Type": "application/json" },
-  body: JSON.stringify({
-    md: "# Hello\n\nThis is **bold**.",
-    name: "demo"
-  })
-})
-// → { url: "https://scratch-pad-beryl.vercel.app/demo?md=%23+Hello..." }
+### POST /api/url (recommended for agents)
+
+Send raw markdown in the body — no manual encoding needed:
+
+```
+POST https://scratch-pad-beryl.vercel.app/api/url
+Content-Type: application/json
+
+{ "md": "# Hello\n\nThis is **bold**.", "name": "demo" }
+
+→ { "url": "https://scratch-pad-beryl.vercel.app/demo?md=%23+Hello..." }
 ```
 
-**URL param directly** — use when you already have or can build the URL yourself. The md value must be `encodeURIComponent()`-encoded:
+### GET /api/url
+
+For agents whose fetch tool only supports GET. The `md` value must be URL-encoded:
+
+```
+GET https://scratch-pad-beryl.vercel.app/api/url?md=%23+Hello&name=demo
+
+→ { "url": "https://scratch-pad-beryl.vercel.app/demo?md=%23+Hello..." }
+```
+
+### Direct URL (no API call needed)
+
+Build the URL yourself if you can encode markdown:
 
 ```
 https://scratch-pad-beryl.vercel.app/?md=%23+Hello
-```
-
-**Name + md combo:**
-
-```
 https://scratch-pad-beryl.vercel.app/recipes?md=%23+My+Recipe
 ```
+
+The `md` value must be `encodeURIComponent()`-encoded.
 
 ## The copy flow (what makes this useful)
 
