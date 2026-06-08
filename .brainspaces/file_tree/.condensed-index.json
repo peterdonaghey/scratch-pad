@@ -1,0 +1,87 @@
+{
+  "notes_md.md": {
+    "chars": 1692,
+    "essence": "Design history and business rules for scratch\u2011pad; must consult this file before making changes.",
+    "at": "2026-06-08T15:15:50+00:00"
+  },
+  "eslint_config_js.md": {
+    "chars": 1141,
+    "essence": "ESLint flat config for TypeScript React Vite \u2014 only lints `.ts/.tsx` files, ignores `dist/`, uses recommended presets. Edit with caution: flat format requires ESLint v9+.",
+    "at": "2026-06-08T15:15:51+00:00"
+  },
+  "SKILL_md.md": {
+    "chars": 1471,
+    "essence": "Documentation for Scratch Pad markdown-to-shareable-URL service \u2014 API endpoint POST /api/url, 7-day TTL, localStorage persistence for named sheets.",
+    "at": "2026-06-08T15:15:51+00:00"
+  },
+  "README_md.md": {
+    "chars": 1130,
+    "essence": "README documentation \u2014 describes architecture, API endpoints, and design decisions.",
+    "at": "2026-06-08T15:15:52+00:00"
+  },
+  "App_tsx.md": {
+    "chars": 1978,
+    "essence": "Main App component for Markdown scratch pad with live preview, local storage, URL sharing, and auto-save \u2014 critical: auto-save skips when content loaded from URL and a named sheet exists, so don't break that logic.",
+    "at": "2026-06-08T15:15:53+00:00"
+  },
+  "ProseConfigPanel_tsx.md": {
+    "chars": 1023,
+    "essence": "Controlled prose config panel with overlay dismissal and reset to defaults; expect `config` and `onChange` props, and renders nothing when `open` is false.",
+    "at": "2026-06-08T15:15:54+00:00"
+  },
+  "SheetsPanel_tsx.md": {
+    "chars": 1236,
+    "essence": "Sheet panel component that refreshes list only on open; deletes with window.confirm and hard-navigates via window.location.href.",
+    "at": "2026-06-08T15:15:54+00:00"
+  },
+  "package_json.md": {
+    "chars": 1460,
+    "essence": "Package config for a private React 19 scratch\u2011pad app (Vite/TS/Redis) \u2014 critical to preserve `\"private\": true` and `\"type\": \"module\"`.",
+    "at": "2026-06-08T15:15:54+00:00"
+  },
+  "main_tsx.md": {
+    "chars": 681,
+    "essence": "Entry point mounts React app into `#root`; critical: root element must exist.",
+    "at": "2026-06-08T15:15:55+00:00"
+  },
+  "tsconfig_json.md": {
+    "chars": 930,
+    "essence": "Root tsconfig delegating to sub-projects \u2014 never edit here; modify tsconfig.app.json or tsconfig.node.json instead.",
+    "at": "2026-06-08T15:15:57+00:00"
+  },
+  "tsconfig_app_json.md": {
+    "chars": 644,
+    "essence": "TypeScript config for `src/` with strict bundler\u2011style settings (`verbatimModuleSyntax`, `noEmit`, React JSX) \u2013 only modify if you know how these affect Vite's build.",
+    "at": "2026-06-08T15:15:57+00:00"
+  },
+  "storage_ts.md": {
+    "chars": 1636,
+    "essence": "LocalStorage utility for scratch pad state \u2014 note `!important` CSS overrides and silent failure on storage full.",
+    "at": "2026-06-08T15:15:58+00:00"
+  },
+  "vercel_json.md": {
+    "chars": 985,
+    "essence": "Vercel rewrite config: routes `/api/*` to itself and everything else to `index.html` for SPA client-side routing \u2014 order matters.",
+    "at": "2026-06-08T15:15:59+00:00"
+  },
+  "tsconfig_node_json.md": {
+    "chars": 1163,
+    "essence": "TSConfig for `vite.config.ts` only \u2014 strict, type-only checks; uses `verbatimModuleSyntax` and `erasableSyntaxOnly`; no enums/namespaces allowed; unused vars fail build; not used for app source.",
+    "at": "2026-06-08T15:15:59+00:00"
+  },
+  "types_ts.md": {
+    "chars": 1260,
+    "essence": "Exports static types and constants (prose config, state, storage, fonts) for the scratch pad editor; editing any value here affects every component that imports from this module.",
+    "at": "2026-06-08T15:16:00+00:00"
+  },
+  "vite_config_ts.md": {
+    "chars": 334,
+    "essence": "Vite config file with React plugin; add all Vite configuration changes here.",
+    "at": "2026-06-08T15:16:00+00:00"
+  },
+  "project_json.md": {
+    "chars": 507,
+    "essence": "I don't have any file content to analyse yet. Please paste the actual source code or file path you'd like summarised, and I'll write the compact essence line as requested.",
+    "at": "2026-06-08T15:16:01+00:00"
+  }
+}

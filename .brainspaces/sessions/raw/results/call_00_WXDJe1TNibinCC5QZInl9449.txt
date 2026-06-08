@@ -1,0 +1,1 @@
+[{'Text': '     1\t{\n     2\t  "rewrites": [\n     3\t    { "source": "/api/(.*)", "destination": "/api/$1" },\n     4\t    { "source": "/(.*)", "destination": "/index.html" }\n     5\t  ]\n     6\t}\n'}]

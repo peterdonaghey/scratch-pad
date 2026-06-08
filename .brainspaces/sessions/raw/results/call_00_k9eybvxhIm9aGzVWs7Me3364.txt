@@ -1,0 +1,1 @@
+[{'Text': 'Cannot read file because its path matches the global `private_files` setting: scratch-pad/.env.local'}]

@@ -1,0 +1,7 @@
+{
+  "2026-06-08T09-28-44_scratch-pad-content-hash-url-proposal.md": {
+    "chars": 3613,
+    "essence": "Replaced `?md=` URL scheme with `?id=` via Upstash Redis, removed all legacy `?md=` support, and added a \"My Sheets\" localStorage panel to eliminate URL length limits and agent confusion.",
+    "at": "2026-06-08T15:15:56+00:00"
+  }
+}
