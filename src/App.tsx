@@ -7,7 +7,8 @@ import {
   saveToStorage,
   proseConfigToCss,
   getInitialState,
-  buildScratchPadUrl,
+  parseIdFromUrl,
+  fetchContentById,
 } from "./storage"
 import { CONTENT_CLASS, WELCOME_MARKDOWN } from "./types"
 
@@ -28,10 +29,36 @@ export default function App() {
 
   const [panelOpen, setPanelOpen] = useState(false)
   const [copied, setCopied] = useState(false)
+  const [loadingRemote, setLoadingRemote] = useState(false)
+  const [remoteError, setRemoteError] = useState<string | null>(null)
   const previewRef = useRef<HTMLDivElement>(null)
 
+  // On mount, check for ?id= in the URL and fetch content from the API
+  useEffect(() => {
+    const id = parseIdFromUrl()
+    if (!id) return
+
+    setLoadingRemote(true)
+
+    fetchContentById(id).then((data) => {
+      if (!data) {
+        setRemoteError("Content not found — the link may have expired.")
+        setLoadingRemote(false)
+        return
+      }
+      setState((prev) => ({
+        ...prev,
+        markdown: data.md,
+        loadedFromUrl: true,
+        // If the stored content has a name, use it as the sheet name
+        sheetName: data.name ?? prev.sheetName,
+      }))
+      setLoadingRemote(false)
+    })
+  }, [])
+
   // Debounced auto-save — NEVER saves to a named key when loaded from URL
-  // (prevents ?md= from overwriting a user's named sheet)
+  // (prevents ?id= shared content from overwriting a user's named sheet)
   useEffect(() => {
     // Skip auto-save when content arrived via URL on a named sheet
     if (loadedFromUrl && sheetName) return
@@ -98,10 +125,19 @@ export default function App() {
     URL.revokeObjectURL(url)
   }, [markdown, sheetName])
 
-  // Copy scratch pad URL to clipboard
-  const handleCopyUrl = useCallback(() => {
-    const url = buildScratchPadUrl(markdown, sheetName ?? undefined)
-    navigator.clipboard.writeText(url).catch(() => {})
+  // Copy scratch pad URL to clipboard — uses API to get a short ?id= URL
+  const handleCopyUrl = useCallback(async () => {
+    try {
+      const res = await fetch("/api/url", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ md: markdown, name: sheetName || undefined }),
+      })
+      const { url } = await res.json()
+      await navigator.clipboard.writeText(url)
+    } catch {
+      // API unavailable — silently fail
+    }
   }, [markdown, sheetName])
 
   // Clear
@@ -172,7 +208,44 @@ export default function App() {
         </div>
       </header>
 
+      {/* Loading / error state for remote content */}
+      {loadingRemote && (
+        <div className="split-pane">
+          <div className="pane pane-edit">
+            <div className="pane-label">Markdown</div>
+            <div className="md-input md-input-idle">
+              <div className="loading-dots"><span></span><span></span><span></span></div>
+            </div>
+          </div>
+          <div className="pane pane-preview">
+            <div className="pane-label">Preview</div>
+            <div className={`preview ${CONTENT_CLASS}`}>
+              <p><em>Loading shared content…</em></p>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {remoteError && (
+        <div className="split-pane">
+          <div className="pane pane-edit">
+            <div className="pane-label">Markdown</div>
+            <div className="md-input md-input-idle">
+              <span style={{ color: "#c00" }}>⚠</span>
+            </div>
+          </div>
+          <div className="pane pane-preview">
+            <div className="pane-label">Preview</div>
+            <div className={`preview ${CONTENT_CLASS}`}>
+              <p style={{ color: "#c00" }}>{remoteError}</p>
+              <p>Try requesting a fresh link from the agent.</p>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Split pane: editor + preview */}
+      {!loadingRemote && !remoteError && (
       <div className="split-pane">
         <div className="pane pane-edit">
           <div className="pane-label">Markdown</div>
@@ -193,6 +266,7 @@ export default function App() {
           />
         </div>
       </div>
+      )}
 
       {/* Styles panel */}
       <ProseConfigPanel
