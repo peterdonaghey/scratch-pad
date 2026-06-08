@@ -6,6 +6,9 @@ A minimal markdown editor with live preview, full style control, and clipboard-f
 **Agent API:** `POST /api/url` — send markdown, get a short shareable URL back  
 **Agent skill:** See [`SKILL.md`](SKILL.md) for the full agent protocol
 
+<img width="942" height="410" alt="image" src="https://github.com/user-attachments/assets/efbc8144-8808-486b-afe7-9296366c6314" />
+
+
 ---
 
 ## How it works
