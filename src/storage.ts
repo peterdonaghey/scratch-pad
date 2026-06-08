@@ -22,9 +22,17 @@ export function loadFromStorage(sheetName?: string): ScratchPadState | null {
 
 export function saveToStorage(state: ScratchPadState, sheetName?: string): void {
   try {
-    localStorage.setItem(storageKey(sheetName), JSON.stringify(state))
+    localStorage.setItem(storageKey(sheetName), JSON.stringify({ ...state, savedAt: Date.now() }))
   } catch {
     // localStorage full or unavailable — silently fail
+  }
+}
+
+export function deleteSheet(sheetName?: string): void {
+  try {
+    localStorage.removeItem(storageKey(sheetName))
+  } catch {
+    // silently fail
   }
 }
 
@@ -52,6 +60,96 @@ export async function fetchContentById(id: string): Promise<{ md: string; name: 
   } catch {
     return null
   }
+}
+
+export interface SheetInfo {
+  name: string | null       // null for unnamed, string for named
+  title: string              // first # heading, or sheet name, or "Untitled"
+  snippet: string            // first ~120 chars of plain-ish text
+  savedAt: number | null
+}
+
+/** Exclude default welcome text from the unnamed sheet listing. */
+const WELCOME_MARKDOWN_COMPACT = WELCOME_MARKDOWN.replace(/\s+/g, " ").trim()
+
+function isWelcomePage(md: string): boolean {
+  return md.replace(/\s+/g, " ").trim() === WELCOME_MARKDOWN_COMPACT
+}
+
+function extractTitle(md: string, name: string | null): string {
+  // First # Heading
+  const match = md.match(/^#\s+(.+)/m)
+  if (match) return match[1].trim()
+  // Fall back to sheet name
+  if (name) return name
+  return "Untitled"
+}
+
+function extractSnippet(md: string): string {
+  // Strip headings, code blocks, blockquotes, horizontal rules, images
+  const clean = md
+    .replace(/^```[\s\S]*?```$/gm, "")
+    .replace(/^#+\s+/gm, "")
+    .replace(/^>\s+/gm, "")
+    .replace(/^---+$/gm, "")
+    .replace(/!\[.*?\]\(.*?\)/g, "")
+    .replace(/\[([^\]]+)\]\(.*?\)/g, "$1")
+    .replace(/[*_~`]/g, "")
+    .replace(/\n{2,}/g, " ")
+    .trim()
+  return clean.substring(0, 120).replace(/\s+$/, "") + (clean.length > 120 ? "…" : "")
+}
+
+/**
+ * List all saved sheets from localStorage.
+ * Returns unnamed first, then named sheets alphabetically.
+ */
+export function listSavedSheets(): SheetInfo[] {
+  const results: SheetInfo[] = []
+
+  for (let i = 0; i < localStorage.length; i++) {
+    const key = localStorage.key(i)
+    if (!key) continue
+
+    // Match scratch-pad-state or scratch-pad-state:<name>
+    let name: string | null = null
+    if (key === STORAGE_KEY) {
+      name = null
+    } else if (key.startsWith(STORAGE_KEY + ":")) {
+      name = key.slice(STORAGE_KEY.length + 1)
+    } else {
+      continue
+    }
+
+    try {
+      const raw = localStorage.getItem(key)
+      if (!raw) continue
+      const parsed = JSON.parse(raw) as ScratchPadState
+      if (typeof parsed.markdown !== "string") continue
+
+      // Skip unnamed sheets that are just the welcome page
+      if (name === null && isWelcomePage(parsed.markdown)) continue
+
+      results.push({
+        name,
+        title: extractTitle(parsed.markdown, name),
+        snippet: extractSnippet(parsed.markdown),
+        savedAt: parsed.savedAt ?? null,
+      })
+    } catch {
+      // skip unparseable entries
+    }
+  }
+
+  // Sort: unnamed first, then alphabetical by title
+  results.sort((a, b) => {
+    if (a.name === null && b.name === null) return 0
+    if (a.name === null) return -1
+    if (b.name === null) return 1
+    return a.title.localeCompare(b.title)
+  })
+
+  return results
 }
 
 /**

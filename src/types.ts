@@ -25,6 +25,7 @@ export const DEFAULT_PROSE: ProseConfig = {
 export interface ScratchPadState {
   markdown: string
   prose: ProseConfig
+  savedAt?: number
 }
 
 export const STORAGE_KEY = "scratch-pad-state"
