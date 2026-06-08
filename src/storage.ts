@@ -35,24 +35,23 @@ export function parseNameFromUrl(): string | null {
   return path || null
 }
 
-export function parseMdFromUrl(): string | null {
-  const params = new URLSearchParams(window.location.search)
-  const md = params.get("md")
-  if (!md) return null
+/** Read the ?id= parameter from the URL (short shared ID via Upstash Redis). */
+export function parseIdFromUrl(): string | null {
+  return new URLSearchParams(window.location.search).get("id")
+}
+
+/**
+ * Fetch stored markdown content from the API by its short ID.
+ * Used when the URL has ?id= instead of ?md=.
+ */
+export async function fetchContentById(id: string): Promise<{ md: string; name: string | null } | null> {
   try {
-    return decodeURIComponent(md)
+    const res = await fetch(`/api/content?id=${encodeURIComponent(id)}`)
+    if (!res.ok) return null
+    return await res.json()
   } catch {
     return null
   }
-}
-
-export function buildScratchPadUrl(markdown: string, sheetName?: string): string {
-  const base = sheetName
-    ? `${window.location.origin}/${encodeURIComponent(sheetName)}`
-    : window.location.origin + window.location.pathname.replace(/[^/]*$/, "")
-  const url = new URL(base)
-  url.searchParams.set("md", markdown)
-  return url.toString()
 }
 
 /**
@@ -170,11 +169,6 @@ export function getInitialState(): {
   sheetName: string | null
 } {
   const sheetName = parseNameFromUrl()
-  const urlMd = parseMdFromUrl()
-
-  if (urlMd !== null) {
-    return { markdown: urlMd, prose: { ...DEFAULT_PROSE }, loadedFromUrl: true, sheetName }
-  }
 
   const saved = loadFromStorage(sheetName ?? undefined)
   if (saved) {

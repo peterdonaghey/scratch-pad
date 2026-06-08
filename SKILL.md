@@ -1,3 +1,8 @@
+---
+name: scratch-pad
+description: Generate a shareable Scratch Pad URL with styled markdown content. Agents POST markdown to an API endpoint and get back a short URL that opens a WYSIWYG editor with live preview, style control, and clipboard-friendly copy. No manual encoding needed.
+---
+
 # Scratch Pad — Agent Skill
 
 Agents use Scratch Pad to present styled markdown content to users in a way that copies cleanly into any app (email, docs, etc.). No clipboard hacks — the browser handles it.
@@ -10,10 +15,10 @@ Content-Type: application/json
 
 { "md": "# Your markdown here", "name": "optional-sheet-name" }
 
-→ { "url": "https://..." }
+→ { "url": "https://scratch-pad-beryl.vercel.app/?id=abc-123-def" }
 ```
 
-Send raw markdown in the body. The endpoint returns a ready-to-share URL. No manual encoding needed.
+Send raw markdown in the body. The endpoint returns a short, clean URL. No manual encoding needed. Content is stored server-side and auto-expires after 7 days.
 
 ## How it works
 
@@ -22,22 +27,9 @@ Scratch Pad is a split-pane markdown editor:
 - **Right pane** — rendered preview with full style control
 - **📋 Copy rendered** button — selects the preview and runs native browser copy, so all computed styles (fonts, colors, table borders, code backgrounds) survive the paste
 
-## URL schemes
+## API endpoint
 
-| URL | Behavior |
-|-----|----------|
-| `/` | Default unnamed scratch pad |
-| `/?md=<encoded>` | Load content from URL, auto-saves to unnamed key |
-| `/sheet-name` | Named sheet, loads/saves from local storage |
-| `/sheet-name?md=<encoded>` | View shared content on a named sheet — **never** overwrites saved content until user explicitly saves |
-| `GET /api/url?md=<encoded>&name=<optional>` | Returns `{ "url": "..." }` — no redirect, pure JSON |
-| `POST /api/url` `{ "md": "...", "name": "..." }` | Returns `{ "url": "..." }` — send raw markdown, no encoding needed |
-
-## API endpoints
-
-Both endpoints return the same JSON: `{ "url": "https://..." }`
-
-### POST /api/url (recommended for agents)
+### POST /api/url
 
 Send raw markdown in the body — no manual encoding needed:
 
@@ -47,36 +39,25 @@ Content-Type: application/json
 
 { "md": "# Hello\n\nThis is **bold**.", "name": "demo" }
 
-→ { "url": "https://scratch-pad-beryl.vercel.app/demo?md=%23+Hello..." }
+→ { "url": "https://scratch-pad-beryl.vercel.app/demo?id=abc-123-def" }
 ```
 
-### GET /api/url
+## URL schemes
 
-For agents whose fetch tool only supports GET. The `md` value must be URL-encoded:
-
-```
-GET https://scratch-pad-beryl.vercel.app/api/url?md=%23+Hello&name=demo
-
-→ { "url": "https://scratch-pad-beryl.vercel.app/demo?md=%23+Hello..." }
-```
-
-### Direct URL (no API call needed)
-
-Build the URL yourself if you can encode markdown:
-
-```
-https://scratch-pad-beryl.vercel.app/?md=%23+Hello
-https://scratch-pad-beryl.vercel.app/recipes?md=%23+My+Recipe
-```
-
-The `md` value must be `encodeURIComponent()`-encoded.
+| URL | Behavior |
+|-----|----------|
+| `/` | Default unnamed scratch pad |
+| `/?id=<uuid>` | Load shared content from Upstash Redis |
+| `/sheet-name` | Named sheet, loads/saves from local storage |
+| `/sheet-name?id=<uuid>` | View shared content on a named sheet — **never** overwrites saved content until user explicitly saves |
 
 ## The copy flow (what makes this useful)
 
-1. Agent sends user a Scratch Pad URL (via POST endpoint or direct link)
-2. User opens it, sees styled rendered content
-3. User clicks **📋 Copy rendered** (or Cmd+A on the preview, then Cmd+C)
-4. User pastes into Gmail, Google Docs, Word, etc. — all formatting (headings, bold, code blocks, tables with borders) survives
+1. Agent POSTs markdown to `/api/url` — gets back a short `?id=` URL
+2. Agent sends the URL to the user
+3. User opens it, sees styled rendered content
+4. User clicks **📋 Copy rendered** (or Cmd+A on the preview, then Cmd+C)
+5. User pastes into Gmail, Google Docs, Word, etc. — all formatting (headings, bold, code blocks, tables with borders) survives
 
 No custom clipboard pipeline. No lost formatting.
 
@@ -97,11 +78,12 @@ Users can save content under a name via the **💾 Save** button. This:
 2. Navigates to `/<name>` for a clean URL
 3. Auto-saves on every change (debounced 500ms)
 
-Named sheets are user-controlled. Agent-loaded content (`?md=`) never overwrites a named sheet until the user explicitly saves.
+Named sheets are user-controlled. Agent-loaded content (`?id=`) never overwrites a named sheet until the user explicitly saves.
 
 ## Things to know
 
-- The page is a single HTML+JS bundle deployed on Vercel, no backend
+- The page is a single HTML+JS bundle deployed on Vercel
+- Shared URLs (`?id=`) store content in Upstash Redis with a 7-day TTL — save to localStorage if you want it permanent
 - localStorage persistence — survives refresh, crash, accidental close
 - The `/api/url` endpoint has open CORS (`Access-Control-Allow-Origin: *`)
-- Total bundle: ~245KB JS + ~4KB CSS (76KB gzipped)
+- Total bundle: ~247KB JS + ~4KB CSS (77KB gzipped)
