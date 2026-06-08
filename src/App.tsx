@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { marked } from "marked"
 
 import { ProseConfigPanel } from "./ProseConfigPanel"
+import { SheetsPanel } from "./SheetsPanel"
 import type { ProseConfig, ScratchPadState } from "./types"
 import {
   saveToStorage,
@@ -28,6 +29,7 @@ export default function App() {
   const { markdown, prose, loadedFromUrl, sheetName } = state
 
   const [panelOpen, setPanelOpen] = useState(false)
+  const [sheetsOpen, setSheetsOpen] = useState(false)
   const [copied, setCopied] = useState(false)
   const [loadingRemote, setLoadingRemote] = useState(false)
   const [remoteError, setRemoteError] = useState<string | null>(null)
@@ -196,6 +198,9 @@ export default function App() {
           <button className="btn" onClick={handleCopyUrl}>
             Copy URL
           </button>
+          <button className="btn" onClick={() => setSheetsOpen(true)}>
+            My Sheets
+          </button>
           <button className="btn" onClick={() => setPanelOpen(true)}>
             Styles
           </button>
@@ -274,6 +279,12 @@ export default function App() {
         config={prose}
         onChange={handleProseChange}
         onClose={() => setPanelOpen(false)}
+      />
+
+      {/* Sheets panel */}
+      <SheetsPanel
+        open={sheetsOpen}
+        onClose={() => setSheetsOpen(false)}
       />
     </div>
   )
