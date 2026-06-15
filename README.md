@@ -3,7 +3,7 @@
 A minimal markdown editor with live preview, full style control, and clipboard-friendly copy. Designed for agents to present styled content to users — and for users to save, tweak, and share it.
 
 **Live at:** [https://scratch-pad-beryl.vercel.app](https://scratch-pad-beryl.vercel.app)  
-**Agent API:** `POST /api/url` — send markdown, get a short shareable URL back  
+**Agent API:** `POST /api/url` or `GET /api/url?md=...` — send markdown, get a short `?id=` URL back  
 **Agent skill:** See [`SKILL.md`](SKILL.md) for the full agent protocol
 
 ---
