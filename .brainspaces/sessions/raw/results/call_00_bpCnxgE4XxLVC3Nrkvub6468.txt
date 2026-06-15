@@ -1,0 +1,1 @@
+[{'Text': "     1\timport { defineConfig } from 'vite'\n     2\timport react from '@vitejs/plugin-react'\n     3\t\n     4\t// https://vite.dev/config/\n     5\texport default defineConfig({\n     6\t  plugins: [react()],\n     7\t})\n"}]

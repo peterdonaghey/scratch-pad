@@ -27,9 +27,9 @@ Scratch Pad is a split-pane markdown editor:
 - **Right pane** — rendered preview with full style control
 - **📋 Copy rendered** button — selects the preview and runs native browser copy, so all computed styles (fonts, colors, table borders, code backgrounds) survive the paste
 
-## API endpoint
+## API endpoints
 
-### POST /api/url
+### POST /api/url (recommended for agents with JSON body support)
 
 Send raw markdown in the body — no manual encoding needed:
 
@@ -42,6 +42,18 @@ Content-Type: application/json
 → { "url": "https://scratch-pad-beryl.vercel.app/demo?id=abc-123-def" }
 ```
 
+### GET /api/url (for agents whose fetch tool only supports GET)
+
+The `md` value must be `encodeURIComponent()`-encoded:
+
+```
+GET https://scratch-pad-beryl.vercel.app/api/url?md=%23+Hello&name=demo
+
+→ { "url": "https://scratch-pad-beryl.vercel.app/demo?id=abc-123-def" }
+```
+
+Important: `?md=` is only used as the **input** to the API — the returned URL uses the short `?id=` scheme and never contains the full markdown.
+
 ## URL schemes
 
 | URL | Behavior |
@@ -53,7 +65,7 @@ Content-Type: application/json
 
 ## The copy flow (what makes this useful)
 
-1. Agent POSTs markdown to `/api/url` — gets back a short `?id=` URL
+1. Agent POSTs or GETs markdown to `/api/url` — gets back a short `?id=` URL
 2. Agent sends the URL to the user
 3. User opens it, sees styled rendered content
 4. User clicks **📋 Copy rendered** (or Cmd+A on the preview, then Cmd+C)

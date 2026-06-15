@@ -1,0 +1,1 @@
+[{'Text': 'Edited scratch-pad/src/App.tsx:\n\n```diff\n@@ -258,6 +258,7 @@\n           />\n         </div>\n       </div>\n+      )}\n \n       {/* Styles panel */}\n       <ProseConfigPanel\n\n```'}]

@@ -1,0 +1,1 @@
+[{'Text': '```\nVercel CLI 48.6.0\n🔍  Inspect: https://vercel.com/peterdonagheys-projects/scratch-pad/7MEYEgixBx5eoMyFXunPY4CDMEpt [4s]\n✅  Production: https://scratch-5857j48ix-peterdonagheys-projects.vercel.app [4s]\n```'}]

@@ -1,0 +1,1 @@
+[{'Text': 'Command "gh gist create --public --filename "scratch-pad-skill.md" --desc "Scratch Pad — agent skill for sharing styled markdown content with short URLs" scratch-pad/SKILL.md" failed with exit code 1.\n\n```\nfailed to collect files for posting: failed to read file scratch-pad/SKILL.md: open scratch-pad/SKILL.md: no such file or directory\n```'}]

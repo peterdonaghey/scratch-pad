@@ -1,0 +1,1 @@
+[{'Text': '   370\t    opacity: 1;\n   371\t    transform: scale(1);\n   372\t  }\n   373\t}\n'}]

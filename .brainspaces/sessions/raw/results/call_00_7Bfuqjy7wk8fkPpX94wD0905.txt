@@ -1,0 +1,1 @@
+[{'Text': '     1\timport { StrictMode } from "react"\n     2\timport { createRoot } from "react-dom/client"\n     3\timport "./index.css"\n     4\timport App from "./App"\n     5\t\n     6\tcreateRoot(document.getElementById("root")!).render(\n     7\t  <StrictMode>\n     8\t    <App />\n     9\t  </StrictMode>,\n    10\t)\n'}]

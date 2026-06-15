@@ -1,0 +1,1 @@
+[{'Text': 'Edited scratch-pad/src/types.ts:\n\n```diff\n@@ -25,6 +25,7 @@\n export interface ScratchPadState {\n   markdown: string\n   prose: ProseConfig\n+  savedAt?: number\n }\n \n export const STORAGE_KEY = "scratch-pad-state"\n\n```'}]

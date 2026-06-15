@@ -1,0 +1,1 @@
+[{'Text': '```\n> scratch-pad@0.0.0 build\n> tsc -b && vite build\n\nvite v7.3.5 building client environment for production...\n✓ 34 modules transformed.\ndist/index.html                   0.52 kB │ gzip:  0.34 kB\ndist/assets/index-CkUwaLFV.css    4.40 kB │ gzip:  1.39 kB\ndist/assets/index-Y3wY6Nnj.js   246.72 kB │ gzip: 76.71 kB\n✓ built in 566ms\n```'}]

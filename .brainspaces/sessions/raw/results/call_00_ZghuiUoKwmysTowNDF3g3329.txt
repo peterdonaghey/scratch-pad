@@ -1,0 +1,1 @@
+[{'Text': '```\nadded 2 packages, and audited 163 packages in 1s\n\n39 packages are looking for funding\n  run `npm fund` for details\n\nfound 0 vulnerabilities\n```'}]
