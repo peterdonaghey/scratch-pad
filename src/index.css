@@ -328,6 +328,66 @@ body {
   color: #222;
 }
 
+/* ===== Front matter (YAML metadata) panel ===== */
+/* Scoped under .sp-preview to beat prose config specificity */
+.sp-preview .fm-table {
+  border-collapse: separate !important;
+  border-spacing: 0 !important;
+  width: 100% !important;
+  margin-bottom: 24px !important;
+  border: 1px solid rgba(128, 128, 128, 0.2) !important;
+  border-radius: 6px !important;
+  overflow: hidden !important;
+  font-size: 0.85em !important;
+  background: rgba(128, 128, 128, 0.04) !important;
+}
+
+.sp-preview .fm-table tr:not(:last-child) th,
+.sp-preview .fm-table tr:not(:last-child) td {
+  border-bottom: 1px solid rgba(128, 128, 128, 0.1) !important;
+}
+
+.sp-preview .fm-key {
+  width: 30% !important;
+  min-width: 100px !important;
+  padding: 5px 12px !important;
+  font-family: inherit !important;
+  font-weight: 600 !important;
+  font-size: 0.85em !important;
+  text-align: left !important;
+  vertical-align: top !important;
+  color: inherit !important;
+  opacity: 0.65 !important;
+  text-transform: uppercase !important;
+  letter-spacing: 0.5px !important;
+  background: transparent !important;
+  border: none !important;
+}
+
+.sp-preview .fm-val {
+  padding: 5px 12px 5px 0 !important;
+  font-family: inherit !important;
+  font-size: 0.95em !important;
+  text-align: left !important;
+  vertical-align: top !important;
+  color: inherit !important;
+  border: none !important;
+}
+
+.sp-preview .fm-null {
+  opacity: 0.4 !important;
+}
+
+.sp-preview .fm-tag {
+  display: inline-block !important;
+  padding: 1px 8px !important;
+  margin: 1px 3px 1px 0 !important;
+  font-size: 0.85em !important;
+  border-radius: 3px !important;
+  background: rgba(128, 128, 128, 0.1) !important;
+  font-family: inherit !important;
+}
+
 /* ===== Loading / idle states for remote content ===== */
 .md-input-idle {
   flex: 1;

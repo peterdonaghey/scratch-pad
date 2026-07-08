@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { marked } from "marked"
 
 import { ProseConfigPanel } from "./ProseConfigPanel"
+import { parseFrontmatter, renderFrontmatterHtml } from "./frontmatter"
 import { SheetsPanel } from "./SheetsPanel"
 import type { ProseConfig, ScratchPadState } from "./types"
 import {
@@ -86,10 +87,15 @@ export default function App() {
     setState((prev) => ({ ...prev, prose: next }))
   }, [])
 
-  // Render markdown to HTML
+  // Parse front matter and render markdown to HTML
   const renderedHtml = useMemo(() => {
     try {
-      return marked.parse(markdown, { breaks: true })
+      const { frontmatter, body } = parseFrontmatter(markdown)
+      const bodyHtml = marked.parse(body, { breaks: true })
+      if (frontmatter) {
+        return renderFrontmatterHtml(frontmatter) + bodyHtml
+      }
+      return bodyHtml
     } catch {
       return "<p>Error rendering markdown</p>"
     }
