@@ -201,6 +201,9 @@ export default function App() {
           <button className="btn" onClick={() => setSheetsOpen(true)}>
             My Sheets
           </button>
+          <a className="btn btn-link" href="https://gist.github.com/peterdonaghey/dd31cedd0445f094ed0fd5af505ef768" target="_blank" rel="noopener">
+            Skill
+          </a>
           <button className="btn" onClick={() => setPanelOpen(true)}>
             Styles
           </button>
