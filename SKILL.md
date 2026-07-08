@@ -20,6 +20,34 @@ Content-Type: application/json
 
 Send raw markdown in the body. The endpoint returns a short, clean URL. No manual encoding needed. Content is stored server-side and auto-expires after 7 days.
 
+### Calling from agent tools
+
+When using an HTTP request tool (like `http_request` or `fetch`), pass all required keyword arguments explicitly, even if empty:
+
+```
+http_request(
+  url="https://scratch-pad-beryl.vercel.app/api/url",
+  method="POST",
+  query={},          # required by some tools — pass empty dict
+  headers={"Content-Type": "application/json"},
+  data={"md": "# Your markdown", "name": "optional-name"}  # JSON body
+)
+→ { "url": "https://scratch-pad-beryl.vercel.app/?id=abc-123-def" }
+```
+
+If your tool only supports GET requests, use the query-string form instead:
+
+```
+http_request(
+  url="https://scratch-pad-beryl.vercel.app/api/url?md=%23+Hello&name=demo",
+  method="GET",
+  query={},
+  headers={},
+  data={}
+)
+→ { "url": "https://scratch-pad-beryl.vercel.app/demo?id=abc-123-def" }
+```
+
 ## How it works
 
 Scratch Pad is a split-pane markdown editor:
