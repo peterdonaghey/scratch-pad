@@ -34,7 +34,10 @@ export default function App() {
   const [copied, setCopied] = useState(false)
   const [loadingRemote, setLoadingRemote] = useState(false)
   const [remoteError, setRemoteError] = useState<string | null>(null)
+  const [leftWidth, setLeftWidth] = useState(50) // percentage for editor pane
+  const [dragging, setDragging] = useState(false)
   const previewRef = useRef<HTMLDivElement>(null)
+  const splitPaneRef = useRef<HTMLDivElement>(null)
 
   // On mount, check for ?id= in the URL and fetch content from the API
   useEffect(() => {
@@ -100,6 +103,36 @@ export default function App() {
       return "<p>Error rendering markdown</p>"
     }
   }, [markdown])
+
+  // Resizable split pane divider handlers
+  const handleDividerMouseDown = useCallback((e: React.MouseEvent) => {
+    e.preventDefault()
+    setDragging(true)
+  }, [])
+
+  useEffect(() => {
+    if (!dragging) return
+
+    const handleMouseMove = (e: MouseEvent) => {
+      const container = splitPaneRef.current
+      if (!container) return
+      const rect = container.getBoundingClientRect()
+      const x = e.clientX - rect.left
+      const pct = Math.min(90, Math.max(10, (x / rect.width) * 100))
+      setLeftWidth(pct)
+    }
+
+    const handleMouseUp = () => {
+      setDragging(false)
+    }
+
+    window.addEventListener("mousemove", handleMouseMove)
+    window.addEventListener("mouseup", handleMouseUp)
+    return () => {
+      window.removeEventListener("mousemove", handleMouseMove)
+      window.removeEventListener("mouseup", handleMouseUp)
+    }
+  }, [dragging])
 
   // Generate the dynamic style tag content
   const styleCss = useMemo(() => proseConfigToCss(prose), [prose])
@@ -260,8 +293,11 @@ export default function App() {
 
       {/* Split pane: editor + preview */}
       {!loadingRemote && !remoteError && (
-      <div className="split-pane">
-        <div className="pane pane-edit">
+      <div
+        ref={splitPaneRef}
+        className={`split-pane${dragging ? " dragging" : ""}`}
+      >
+        <div className="pane pane-edit" style={{ width: `${leftWidth}%` }}>
           <div className="pane-label">Markdown</div>
           <textarea
             className="md-input"
@@ -271,7 +307,11 @@ export default function App() {
             spellCheck={false}
           />
         </div>
-        <div className="pane pane-preview">
+        <div
+          className={`divider${dragging ? " active" : ""}`}
+          onMouseDown={handleDividerMouseDown}
+        />
+        <div className="pane pane-preview" style={{ width: `${100 - leftWidth}%` }}>
           <div className="pane-label">Preview</div>
           <div
             ref={previewRef}

@@ -55,8 +55,8 @@ export function parseFrontmatter(md: string): ParseResult {
 /**
  * Render parsed front matter as an HTML metadata panel.
  *
- * Uses the same scope (sp-preview) as the body so the user's prose
- * config (fonts, colors) applies consistently.
+ * Uses a wrapping block layout so the metadata flows naturally when
+ * copied and pasted into email — no fixed table widths.
  */
 export function renderFrontmatterHtml(data: FrontmatterData): string {
   const entries = Object.entries(data).filter(([, v]) => v !== null)
@@ -66,14 +66,10 @@ export function renderFrontmatterHtml(data: FrontmatterData): string {
   const rows = entries.map(([key, value]) => {
     const displayKey = escapeHtml(key.replace(/_/g, " ").replace(/\b\w/g, (c) => c.toUpperCase()))
     const displayValue = formatValue(value)
-    return `
-      <tr>
-        <th class="fm-key">${displayKey}</th>
-        <td class="fm-val">${displayValue}</td>
-      </tr>`
+    return `<div class="fm-row"><span class="fm-label">${displayKey}</span> <span class="fm-value">${displayValue}</span></div>`
   }).join("")
 
-  return `<table class="fm-table" role="presentation">${rows}</table>`
+  return `<div class="fm-block">${rows}</div>`
 }
 
 // ─── Internal ──────────────────────────────────────────────────────────────
