@@ -105,6 +105,12 @@ body {
   background: #fce8e6;
 }
 
+.btn-link {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
 /* ===== Split pane ===== */
 .split-pane {
   flex: 1;
