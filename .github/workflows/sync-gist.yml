@@ -1,0 +1,25 @@
+name: Sync SKILL.md to public gist
+
+on:
+  push:
+    branches: [main]
+    paths: [SKILL.md]
+
+jobs:
+  sync-gist:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Update gist with current SKILL.md
+        env:
+          GH_TOKEN: ${{ secrets.GIST_PAT }}
+        run: |
+          python3 -c "
+          import json
+          content = open('SKILL.md').read()
+          payload = {'files': {'SKILL.md': {'content': content}}}
+          open('/tmp/gist-payload.json', 'w').write(json.dumps(payload))
+          "
+          gh api -X PATCH gists/dd31cedd0445f094ed0fd5af505ef768 \
+            --input /tmp/gist-payload.json
