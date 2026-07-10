@@ -137,19 +137,45 @@ export default function App() {
   // Generate the dynamic style tag content
   const styleCss = useMemo(() => proseConfigToCss(prose), [prose])
 
-  // Copy rendered — selects all in the preview div and uses native browser copy
-  // so computed styles (table borders, fonts, etc.) survive the paste
+  // Copy rendered — grabs the rendered HTML + plain text from the preview div
+  // and writes both to the clipboard via the modern Clipboard API.
+  // This gives us explicit control over clipboard formats and avoids browser
+  // quirks with the deprecated execCommand("copy") path.
   const handleCopy = useCallback(() => {
     const preview = previewRef.current
     if (!preview) return
 
-    const range = document.createRange()
-    range.selectNodeContents(preview)
-    const sel = window.getSelection()
-    sel?.removeAllRanges()
-    sel?.addRange(range)
-    document.execCommand("copy")
-    sel?.removeAllRanges()
+    // Build a standalone HTML document from the preview content so copied styles
+    // (table borders, fonts, colors, etc.) survive the paste into rich text apps.
+    const html = `
+<html>
+<head>
+<meta charset="utf-8">
+<style>
+  body { margin: 0; padding: 8px; }
+</style>
+</head>
+<body>
+${preview.innerHTML}
+</body>
+</html>`
+    const text = preview.innerText
+
+    navigator.clipboard.write([
+      new ClipboardItem({
+        "text/html": new Blob([html], { type: "text/html" }),
+        "text/plain": new Blob([text], { type: "text/plain" }),
+      }),
+    ]).catch(() => {
+      // Clipboard API unavailable — fall back to execCommand
+      const range = document.createRange()
+      range.selectNodeContents(preview)
+      const sel = window.getSelection()
+      sel?.removeAllRanges()
+      sel?.addRange(range)
+      document.execCommand("copy")
+      sel?.removeAllRanges()
+    })
 
     setCopied(true)
     setTimeout(() => setCopied(false), 1500)
