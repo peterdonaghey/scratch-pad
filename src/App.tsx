@@ -2,6 +2,7 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import { marked } from "marked"
 
 import { ProseConfigPanel } from "./ProseConfigPanel"
+import { findEncodingIssues } from "./encoding"
 import { parseFrontmatter, renderFrontmatterHtml } from "./frontmatter"
 import { SheetsPanel } from "./SheetsPanel"
 import type { ProseConfig, ScratchPadState } from "./types"
@@ -137,20 +138,27 @@ export default function App() {
   // Generate the dynamic style tag content
   const styleCss = useMemo(() => proseConfigToCss(prose), [prose])
 
+  // Surface encoding corruption that arrived with the source text
+  // (pasted from a PDF, email or legacy export) before it reaches a client.
+  const encodingIssues = useMemo(() => findEncodingIssues(markdown), [markdown])
+
   // Copy rendered — grabs the rendered HTML + plain text from the preview div
   // and writes both to the clipboard via the modern Clipboard API.
   // This gives us explicit control over clipboard formats and avoids browser
   // quirks with the deprecated execCommand("copy") path.
-  const handleCopy = useCallback(() => {
+  const handleCopy = useCallback(async () => {
     const preview = previewRef.current
     if (!preview) return
 
     // Build a standalone HTML document from the preview content so copied styles
     // (table borders, fonts, colors, etc.) survive the paste into rich text apps.
+    // Both charset declarations are present: legacy consumers look for the
+    // http-equiv form, modern ones for <meta charset>.
     const html = `
 <html>
 <head>
 <meta charset="utf-8">
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8">
 <style>
   body { margin: 0; padding: 8px; }
 </style>
@@ -161,13 +169,17 @@ ${preview.innerHTML}
 </html>`
     const text = preview.innerText
 
-    navigator.clipboard.write([
-      new ClipboardItem({
-        "text/html": new Blob([html], { type: "text/html" }),
-        "text/plain": new Blob([text], { type: "text/plain" }),
-      }),
-    ]).catch(() => {
-      // Clipboard API unavailable — fall back to execCommand
+    try {
+      await navigator.clipboard.write([
+        new ClipboardItem({
+          "text/html;charset=utf-8": new Blob([html], { type: "text/html;charset=utf-8" }),
+          "text/plain;charset=utf-8": new Blob([text], { type: "text/plain;charset=utf-8" }),
+        }),
+      ])
+    } catch {
+      // Clipboard API unavailable or rejected the charset parameters —
+      // fall back to a native selection copy (correct, just without our
+      // explicit charset declaration).
       const range = document.createRange()
       range.selectNodeContents(preview)
       const sel = window.getSelection()
@@ -175,7 +187,7 @@ ${preview.innerHTML}
       sel?.addRange(range)
       document.execCommand("copy")
       sel?.removeAllRanges()
-    })
+    }
 
     setCopied(true)
     setTimeout(() => setCopied(false), 1500)
@@ -280,6 +292,27 @@ ${preview.innerHTML}
           </button>
         </div>
       </header>
+
+      {/* Encoding health warning — corruption is in the source text, not the copy */}
+      {encodingIssues.length > 0 && (
+        <div className="encoding-warning">
+          <strong>⚠ Possible text corruption in this content</strong>
+          <span>
+            It is already present in the source text — copying will carry it
+            through unchanged. Check before sending.
+          </span>
+          <ul>
+            {encodingIssues.map((issue) => (
+              <li key={issue.kind}>
+                {issue.label} — {issue.count}×
+                {issue.examples.length > 0 && (
+                  <code>{issue.examples.join("  ·  ")}</code>
+                )}
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       {/* Loading / error state for remote content */}
       {loadingRemote && (

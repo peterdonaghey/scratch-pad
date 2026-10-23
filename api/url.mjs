@@ -22,7 +22,7 @@ const TTL_SECONDS = 7 * 24 * 60 * 60 // 7 days
 
 async function storeAndRespond(res, md, name) {
   if (!md || typeof md !== "string") {
-    res.writeHead(400, { "Content-Type": "application/json" })
+    res.writeHead(400, { "Content-Type": "application/json; charset=utf-8" })
     return res.end(JSON.stringify({ error: 'Missing "md" parameter' }))
   }
 
@@ -33,11 +33,11 @@ async function storeAndRespond(res, md, name) {
     const url = new URL(BASE + (name ? `/${encodeURIComponent(name)}` : "/"))
     url.searchParams.set("id", id)
 
-    res.writeHead(200, { "Content-Type": "application/json" })
+    res.writeHead(200, { "Content-Type": "application/json; charset=utf-8" })
     res.end(JSON.stringify({ url: url.toString() }))
   } catch (err) {
     console.error("Redis store error:", err)
-    res.writeHead(500, { "Content-Type": "application/json" })
+    res.writeHead(500, { "Content-Type": "application/json; charset=utf-8" })
     res.end(JSON.stringify({ error: "Failed to store content" }))
   }
 }
@@ -51,15 +51,17 @@ export default async function handler(req, res) {
 
   // POST — for agents that can send JSON bodies
   if (req.method === "POST") {
-    let body = ""
-    req.on("data", (c) => (body += c))
+    // Collect Buffers, not strings: decoding each TCP chunk separately would
+    // split multi-byte UTF-8 characters that straddle a chunk boundary.
+    const chunks = []
+    req.on("data", (c) => chunks.push(c))
     await new Promise((resolve) => req.on("end", resolve))
 
     try {
-      const { md, name } = JSON.parse(body)
+      const { md, name } = JSON.parse(Buffer.concat(chunks).toString("utf8"))
       return await storeAndRespond(res, md, name)
     } catch {
-      res.writeHead(400, { "Content-Type": "application/json" })
+      res.writeHead(400, { "Content-Type": "application/json; charset=utf-8" })
       return res.end(JSON.stringify({ error: "Invalid JSON body" }))
     }
   }
@@ -71,6 +73,6 @@ export default async function handler(req, res) {
     return await storeAndRespond(res, qs.get("md"), qs.get("name"))
   }
 
-  res.writeHead(405, { "Content-Type": "application/json" })
+  res.writeHead(405, { "Content-Type": "application/json; charset=utf-8" })
   res.end(JSON.stringify({ error: "Method not allowed" }))
 }
