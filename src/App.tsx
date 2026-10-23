@@ -33,7 +33,7 @@ export default function App() {
   const [panelOpen, setPanelOpen] = useState(false)
   const [sheetsOpen, setSheetsOpen] = useState(false)
   const [copied, setCopied] = useState(false)
-  const [loadingRemote, setLoadingRemote] = useState(false)
+  const [loadingRemote, setLoadingRemote] = useState(() => parseIdFromUrl() !== null)
   const [remoteError, setRemoteError] = useState<string | null>(null)
   const [leftWidth, setLeftWidth] = useState(50) // percentage for editor pane
   const [dragging, setDragging] = useState(false)
@@ -44,8 +44,6 @@ export default function App() {
   useEffect(() => {
     const id = parseIdFromUrl()
     if (!id) return
-
-    setLoadingRemote(true)
 
     fetchContentById(id).then((data) => {
       if (!data) {
@@ -394,10 +392,9 @@ ${preview.innerHTML}
       />
 
       {/* Sheets panel */}
-      <SheetsPanel
-        open={sheetsOpen}
-        onClose={() => setSheetsOpen(false)}
-      />
+      {sheetsOpen && (
+        <SheetsPanel onClose={() => setSheetsOpen(false)} />
+      )}
     </div>
   )
 }

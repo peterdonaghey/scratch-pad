@@ -114,7 +114,7 @@ export function listSavedSheets(): SheetInfo[] {
     // Match scratch-pad-state or scratch-pad-state:<name>
     let name: string | null = null
     if (key === STORAGE_KEY) {
-      name = null
+      // unnamed sheet — name stays null
     } else if (key.startsWith(STORAGE_KEY + ":")) {
       name = key.slice(STORAGE_KEY.length + 1)
     } else {

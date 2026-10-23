@@ -1,24 +1,17 @@
-import { useEffect, useState } from "react"
+import { useState } from "react"
 import { listSavedSheets, deleteSheet } from "./storage"
 import type { SheetInfo } from "./storage"
 
 interface Props {
-  open: boolean
   onClose: () => void
 }
 
-export function SheetsPanel({ open, onClose }: Props) {
-  const [sheets, setSheets] = useState<SheetInfo[]>([])
-
-  // Refresh the list every time the panel opens
-  useEffect(() => {
-    if (open) setSheets(listSavedSheets())
-  }, [open])
-
-  if (!open) return null
+// Mounted only while open, so the list is read fresh on every open.
+export function SheetsPanel({ onClose }: Props) {
+  const [sheets, setSheets] = useState<SheetInfo[]>(() => listSavedSheets())
 
   const handleOpen = (name: string | null) => {
-    window.location.href = name ? `/${encodeURIComponent(name)}` : "/"
+    window.location.assign(name ? `/${encodeURIComponent(name)}` : "/")
   }
 
   const handleDelete = (name: string | null) => {
