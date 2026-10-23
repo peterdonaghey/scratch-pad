@@ -170,10 +170,14 @@ ${preview.innerHTML}
     const text = preview.innerText
 
     try {
+      // Bare MIME types only: Chromium rejects parameterised types such as
+      // "text/html;charset=utf-8" with NotAllowedError. The charset is
+      // carried by the <meta> tags inside the HTML; the Clipboard spec
+      // mandates UTF-8 for text/plain.
       await navigator.clipboard.write([
         new ClipboardItem({
-          "text/html;charset=utf-8": new Blob([html], { type: "text/html;charset=utf-8" }),
-          "text/plain;charset=utf-8": new Blob([text], { type: "text/plain;charset=utf-8" }),
+          "text/html": new Blob([html], { type: "text/html" }),
+          "text/plain": new Blob([text], { type: "text/plain" }),
         }),
       ])
     } catch {
